@@ -1,0 +1,28 @@
+name: Simple build/merge workflow for JavaApp
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: maven
+        
+    - name: Build App
+      run: mvn -B package --file pom.xml
+      
+    - name: Merge Pull Request
+      run: |
+          curl -X PUT -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -d '{"merge_method":"merge"}' \
+          https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/merge

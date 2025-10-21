@@ -1,0 +1,33 @@
+services:
+
+  mysql:
+    image: "mysql:8.0"
+    container_name: "mysql"
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: "forumweb"
+      MYSQL_USER: "forumadm"
+      MYSQL_ROOT_PASSWORD: "root123"
+      MYSQL_PASSWORD: "root123"
+
+  redis:
+    image: "redis:8"
+    volumes:
+      - "./redis.conf:/usr/local/etc/redis/redis.conf"
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    ports:
+      - "6379:6379"
+
+  forumapp:
+    build: .
+    container_name: forumapp
+    ports:
+      - "8080:8080"
+    environment:
+      SQL_USERNAME: "forumadm"
+      SQL_PASSWORD: "root123"
+      SQL_CONN_STRING: "jdbc:mysql://mysql:3306/forumweb?autoReconnect=true&failOverReadOnly=false&maxReconnects=15"
+      TOKEN_KEY: "webforum2025"
+    depends_on:
+      - "mysql"
